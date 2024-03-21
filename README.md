@@ -28,3 +28,12 @@ Read the license.
 [ ] Should there be only one Diagnostic at a time or more?
 
 [ ] Support different languages for the Diagnostics that need it
+
+## Ideals for specific diagnostics
+
+[x] NukeDiagnostic
+
+-   Must induce panic by blinking the entire file with an error
+-   There is nothing you can do until it goes off
+-   It deletes the entire current document
+-   You can `Ctrl + z` back, I'm not crazy

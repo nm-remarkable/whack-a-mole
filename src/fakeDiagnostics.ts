@@ -1,5 +1,6 @@
-import { relative } from 'path';
 import * as vscode from 'vscode';
+
+export const updateInterval = 300;
 
 class FakeDiagnosticBuilder {
     private range?: vscode.Range;
@@ -8,6 +9,11 @@ class FakeDiagnosticBuilder {
         vscode.DiagnosticSeverity.Information;
     private minimumTime: number = 1500;
     private timerRange: number = 1000;
+    private hidden: boolean = false;
+    private update: (instance: FakeDiagnostic) => void = (instance) => {
+        instance.timer -= updateInterval;
+    };
+    private execute: any;
 
     setRange(range: vscode.Range): FakeDiagnosticBuilder {
         this.range = range;
@@ -30,12 +36,32 @@ class FakeDiagnosticBuilder {
         return this;
     }
 
+    setHidden(hidden: boolean): FakeDiagnosticBuilder {
+        this.hidden = hidden;
+        return this;
+    }
+
+    setUpdate(
+        update: (instance: FakeDiagnostic) => void
+    ): FakeDiagnosticBuilder {
+        this.update = update;
+        return this;
+    }
+
+    setExecute(execute: any): FakeDiagnosticBuilder {
+        this.execute = execute;
+        return this;
+    }
+
     build(): FakeDiagnostic {
         return new FakeDiagnostic(
             this.range ?? new vscode.Range(0, 0, 0, 0),
             this.message,
             this.severity,
-            Math.floor(Math.random() * this.timerRange) + this.minimumTime
+            Math.floor(Math.random() * this.timerRange) + this.minimumTime,
+            this.hidden,
+            this.execute,
+            this.update
         );
     }
 }
@@ -45,24 +71,29 @@ export class FakeDiagnostic {
     message: string;
     severity: vscode.DiagnosticSeverity;
     timer: number;
-    valid: boolean = true;
+    hidden: boolean;
     constructor(
         range: vscode.Range,
         message: string,
         severity: vscode.DiagnosticSeverity,
-        timer: number
+        timer: number,
+        hidden: boolean,
+        execute: any,
+        update: (instance: FakeDiagnostic) => void
     ) {
         this.range = range;
         this.message = message;
         this.severity = severity;
         this.timer = timer;
-        if (this.range === undefined || this.message === undefined) {
-            this.valid = false;
-        }
+        this.hidden = hidden;
+        this.execute = execute;
+        this.update = update;
     }
     transform(): vscode.Diagnostic {
         return new vscode.Diagnostic(this.range, this.message, this.severity);
     }
+    execute(any: any): void {}
+    update(instance: FakeDiagnostic): void {}
 }
 
 export class ConstDiagnostic extends FakeDiagnostic {
@@ -82,7 +113,7 @@ export class ConstDiagnostic extends FakeDiagnostic {
                 )
                 .setMessage('Predator missile inbound')
                 .setSeverity(vscode.DiagnosticSeverity.Warning)
-                .setTimer(1000, 500);
+                .setTimer(1500, 500);
             return builder.build();
         }
     }
@@ -90,19 +121,36 @@ export class ConstDiagnostic extends FakeDiagnostic {
 
 export class NukeDiagnostic extends FakeDiagnostic {
     static create(document: vscode.TextDocument) {
-        const minimumLines = 5;
-        const startingLine = Math.floor(
-            Math.random() * document.lineCount - minimumLines
-        );
-        const endLine =
-            startingLine + Math.floor(Math.random() * 5 + minimumLines);
         const builder = new FakeDiagnosticBuilder();
+        // An empty document is not worth nuking
+        if (document.lineCount <= 2) {
+            return undefined;
+        }
         builder
-            .setRange(new vscode.Range(startingLine, 0, endLine, 120))
-            .setMessage('Tactical nuke incoming')
+            // Show an warning in the ENTIRE document
+            .setRange(new vscode.Range(0, 0, document.lineCount, 200))
+            .setMessage(
+                'WARNING! WARNING! NUCLEAR WARHEAD INCOMING! WARNING! WARNING!'
+            )
             .setSeverity(vscode.DiagnosticSeverity.Error)
-            .setTimer(7000, 5000);
+            .setTimer(7000, 5000)
+            .setExecute(NukeDiagnostic.execute)
+            .setUpdate((instance: FakeDiagnostic) => {
+                instance.timer -= updateInterval;
+                instance.hidden = !instance.hidden;
+            });
         return builder.build();
+    }
+
+    static execute(document: any) {
+        // Delete all text in the document
+        let fullTextRange = new vscode.Range(
+            document.positionAt(0),
+            document.positionAt(document.getText().length)
+        );
+        vscode.window.activeTextEditor?.edit((editBuilder) => {
+            editBuilder.delete(fullTextRange);
+        });
     }
 }
 

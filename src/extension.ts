@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import {
+    updateInterval,
     NukeDiagnostic,
     ConstDiagnostic,
     SwearDiagnostic,
@@ -30,11 +31,20 @@ export function activate(context: vscode.ExtensionContext) {
             createFakeDiagnostic(document);
         }
         const vscodeDiagnostics: vscode.Diagnostic[] = [];
-        fakeDiagnostic.forEach((fake) =>
-            vscodeDiagnostics.push(fake.transform())
-        );
+        fakeDiagnostic.forEach((diagnostic, key, map) => {
+            diagnostic.update(diagnostic); // usually just a timer countdown
+            if (diagnostic.timer <= 0) {
+                diagnostic.execute(document);
+                map.delete(key); // We don't need you anymore
+                return;
+            }
+            // Allows for hidden diagnostics or blinking diagnostics
+            if (!diagnostic.hidden) {
+                vscodeDiagnostics.push(diagnostic.transform());
+            }
+        });
         diagnosticCollection.set(document.uri, vscodeDiagnostics);
-    }, 500);
+    }, updateInterval);
 
     // vscode.workspace.onDidChangeTextDocument((event) => { });
 
