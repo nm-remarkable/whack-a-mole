@@ -3,8 +3,9 @@ import * as vscode from 'vscode';
 
 class FakeDiagnosticBuilder {
     private range?: vscode.Range;
-    private message: string = "";
-    private severity: vscode.DiagnosticSeverity = vscode.DiagnosticSeverity.Information;
+    private message: string = '';
+    private severity: vscode.DiagnosticSeverity =
+        vscode.DiagnosticSeverity.Information;
     private minimumTime: number = 1500;
     private timerRange: number = 1000;
 
@@ -30,7 +31,12 @@ class FakeDiagnosticBuilder {
     }
 
     build(): FakeDiagnostic {
-        return new FakeDiagnostic(this.range ?? new vscode.Range(0, 0, 0, 0), this.message, this.severity, Math.floor(Math.random() * this.timerRange) + this.minimumTime);
+        return new FakeDiagnostic(
+            this.range ?? new vscode.Range(0, 0, 0, 0),
+            this.message,
+            this.severity,
+            Math.floor(Math.random() * this.timerRange) + this.minimumTime
+        );
     }
 }
 
@@ -40,7 +46,12 @@ export class FakeDiagnostic {
     severity: vscode.DiagnosticSeverity;
     timer: number;
     valid: boolean = true;
-    constructor(range: vscode.Range, message: string, severity: vscode.DiagnosticSeverity, timer: number) {
+    constructor(
+        range: vscode.Range,
+        message: string,
+        severity: vscode.DiagnosticSeverity,
+        timer: number
+    ) {
         this.range = range;
         this.message = message;
         this.severity = severity;
@@ -62,7 +73,13 @@ export class ConstDiagnostic extends FakeDiagnostic {
             const index = text.indexOf(cosntAwareness[0]);
             const position = document.positionAt(index);
             const builder = new FakeDiagnosticBuilder();
-            builder.setRange(new vscode.Range(position, position.translate(0, cosntAwareness[0].length)))
+            builder
+                .setRange(
+                    new vscode.Range(
+                        position,
+                        position.translate(0, cosntAwareness[0].length)
+                    )
+                )
                 .setMessage('Predator missile inbound')
                 .setSeverity(vscode.DiagnosticSeverity.Warning)
                 .setTimer(1000, 500);
@@ -74,10 +91,14 @@ export class ConstDiagnostic extends FakeDiagnostic {
 export class NukeDiagnostic extends FakeDiagnostic {
     static create(document: vscode.TextDocument) {
         const minimumLines = 5;
-        const startingLine = Math.floor(Math.random() * document.lineCount - minimumLines);
-        const endLine = startingLine + Math.floor((Math.random() * 5) + minimumLines);
+        const startingLine = Math.floor(
+            Math.random() * document.lineCount - minimumLines
+        );
+        const endLine =
+            startingLine + Math.floor(Math.random() * 5 + minimumLines);
         const builder = new FakeDiagnosticBuilder();
-        builder.setRange(new vscode.Range(startingLine, 0, endLine, 120))
+        builder
+            .setRange(new vscode.Range(startingLine, 0, endLine, 120))
             .setMessage('Tactical nuke incoming')
             .setSeverity(vscode.DiagnosticSeverity.Error)
             .setTimer(7000, 5000);
@@ -87,7 +108,6 @@ export class NukeDiagnostic extends FakeDiagnostic {
 
 export class SwearDiagnostic extends FakeDiagnostic {
     static create(document: vscode.TextDocument) {
-
         const text = document.getText();
         const swears = Array.from(text.matchAll(/cum|anal|\sn\s/gi));
         if (swears) {
@@ -95,7 +115,13 @@ export class SwearDiagnostic extends FakeDiagnostic {
             const index = text.indexOf(swear[0]);
             const position = document.positionAt(index);
             const builder = new FakeDiagnosticBuilder();
-            builder.setRange(new vscode.Range(position, position.translate(0, swear[0].length)))
+            builder
+                .setRange(
+                    new vscode.Range(
+                        position,
+                        position.translate(0, swear[0].length)
+                    )
+                )
                 .setMessage('Profanity detected, opinion rejected')
                 .setSeverity(vscode.DiagnosticSeverity.Information)
                 .setTimer(500, 500);
@@ -109,14 +135,22 @@ export class LoggingDiagnostic extends FakeDiagnostic {
     static create(document: vscode.TextDocument) {
         const logTypes = ['critical', 'warning', 'info', 'debug'];
         const text = document.getText();
-        const matches = Array.from(text.matchAll(new RegExp(logTypes.join('|'), 'gi')));
+        const matches = Array.from(
+            text.matchAll(new RegExp(logTypes.join('|'), 'gi'))
+        );
         if (matches) {
             const log = matches[Math.floor(Math.random() * matches.length)];
             const index = text.indexOf(log[0]);
             const position = document.positionAt(index);
             const builder = new FakeDiagnosticBuilder();
 
-            builder.setRange(new vscode.Range(position, position.translate(0, log[0].length)))
+            builder
+                .setRange(
+                    new vscode.Range(
+                        position,
+                        position.translate(0, log[0].length)
+                    )
+                )
                 .setMessage('Spy plane ready to be deployed')
                 .setSeverity(vscode.DiagnosticSeverity.Error);
             return builder.build();
