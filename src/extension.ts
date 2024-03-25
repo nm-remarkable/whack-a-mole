@@ -9,8 +9,23 @@ const diagnosticCollection =
 
 export function activate(context: vscode.ExtensionContext) {
     setInterval(updateLoop, updateInterval);
-    // vscode.workspace.onDidChangeTextDocument((event) => { });
-
+    vscode.workspace.onDidChangeTextDocument((event) => {
+        const document = event.document;
+        console.log('onDidChangeTextDocument', event.reason);
+        event.contentChanges.forEach((change) => {
+            diagnosticMap.forEach((diagnostic) => {
+                console.log(
+                    `change: ${change.range.start.line}, ${diagnostic.range.start.line}`
+                );
+                if (diagnostic.range.start.line > change.range.start.line - 1) {
+                    if (change.text.includes('\n')) {
+                        diagnostic.stillApplies(diagnostic, document, 1);
+                    }
+                    return;
+                }
+            });
+        });
+    });
     // Add to a list of disposables which are disposed when this extension is deactivated.
     context.subscriptions.push(diagnosticCollection);
 }
@@ -27,8 +42,8 @@ function updateLoop() {
     diagnosticMap.forEach((diagnostic, key, map) => {
         diagnostic.update(diagnostic); // usually just a timer countdown
         if (diagnostic.timer <= 0) {
-            diagnostic.execute(diagnostic, document);
             map.delete(key); // We don't need you anymore
+            diagnostic.execute(diagnostic, document);
             return;
         }
         // Allows for hidden diagnostics or blinking diagnostics

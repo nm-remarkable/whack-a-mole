@@ -11,6 +11,13 @@ export class FakeDiagnosticBuilder {
     private update: (instance: FakeDiagnostic) => void = (instance) => {
         instance.timer -= updateInterval;
     };
+    private stillApplies = (
+        instance: FakeDiagnostic,
+        document: TextDocument,
+        offset: number
+    ) => {
+        return true;
+    };
 
     setMessage(message: string): FakeDiagnosticBuilder {
         this.message = message;
@@ -39,6 +46,17 @@ export class FakeDiagnosticBuilder {
         return this;
     }
 
+    setStillApplies(
+        stillApplies: (
+            instance: FakeDiagnostic,
+            document: TextDocument,
+            offset: number
+        ) => boolean
+    ): FakeDiagnosticBuilder {
+        this.stillApplies = stillApplies;
+        return this;
+    }
+
     build(
         name: string,
         range: Range,
@@ -52,7 +70,8 @@ export class FakeDiagnosticBuilder {
             this.timer,
             this.hidden,
             execute,
-            this.update
+            this.update,
+            this.stillApplies
         );
     }
 }
@@ -72,7 +91,12 @@ export class FakeDiagnostic {
         timer: number,
         hidden: boolean,
         execute: any,
-        update: (instance: FakeDiagnostic) => void
+        update: (instance: FakeDiagnostic) => void,
+        stillApplies: (
+            instance: FakeDiagnostic,
+            document: TextDocument,
+            offset: number
+        ) => boolean
     ) {
         this.name = name;
         this.range = range;
@@ -82,10 +106,18 @@ export class FakeDiagnostic {
         this.hidden = hidden;
         this.execute = execute;
         this.update = update;
+        this.stillApplies = stillApplies;
     }
     transform(): Diagnostic {
         return new Diagnostic(this.range, this.message, this.severity);
     }
     execute(instance: FakeDiagnostic, document: TextDocument): void {}
     update(instance: FakeDiagnostic): void {}
+    stillApplies(
+        instance: FakeDiagnostic,
+        document: TextDocument,
+        offset: number
+    ): boolean {
+        return true;
+    }
 }
