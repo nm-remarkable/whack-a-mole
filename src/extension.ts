@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { FakeDiagnostic } from './diagnostics/interface';
-import { updateInterval, diagnosticTypes, maxFakeDiagnostics } from './globals';
+import { FakeDiagnostic, updateInterval } from './diagnostics/interface';
+import { diagnosticTypes, maxFakeDiagnostics } from './globals';
 
 const diagnosticMap: Map<string, FakeDiagnostic> = new Map();
 // Create a collection to report diagnostics to VS Code
