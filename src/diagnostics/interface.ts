@@ -1,20 +1,20 @@
-import * as vscode from 'vscode';
-import { updateInterval } from '../globals';
+import { Range, DiagnosticSeverity, TextDocument, Diagnostic } from 'vscode';
+
+export const baseDiagnosticTime = 5000;
+export const updateInterval = 300;
 
 export class FakeDiagnosticBuilder {
-    private range?: vscode.Range;
+    private range?: Range;
     private message: string = '';
-    private severity: vscode.DiagnosticSeverity =
-        vscode.DiagnosticSeverity.Information;
-    private minimumTime: number = 1500;
-    private timerRange: number = 1000;
+    private severity: DiagnosticSeverity = DiagnosticSeverity.Information;
+    private timer: number = baseDiagnosticTime;
     private hidden: boolean = false;
     private update: (instance: FakeDiagnostic) => void = (instance) => {
         instance.timer -= updateInterval;
     };
     private execute: any;
 
-    setRange(range: vscode.Range): FakeDiagnosticBuilder {
+    setRange(range: Range): FakeDiagnosticBuilder {
         this.range = range;
         return this;
     }
@@ -24,14 +24,13 @@ export class FakeDiagnosticBuilder {
         return this;
     }
 
-    setSeverity(severity: vscode.DiagnosticSeverity): FakeDiagnosticBuilder {
+    setSeverity(severity: DiagnosticSeverity): FakeDiagnosticBuilder {
         this.severity = severity;
         return this;
     }
 
-    setTimer(minimumTime: number, timerRange: number): FakeDiagnosticBuilder {
-        this.minimumTime = minimumTime;
-        this.timerRange = timerRange;
+    setTimer(timer: number): FakeDiagnosticBuilder {
+        this.timer = timer;
         return this;
     }
 
@@ -48,7 +47,7 @@ export class FakeDiagnosticBuilder {
     }
 
     setExecute(
-        execute: (document: vscode.TextDocument) => void
+        execute: (instance: FakeDiagnostic, document: TextDocument) => void
     ): FakeDiagnosticBuilder {
         this.execute = execute;
         return this;
@@ -56,10 +55,10 @@ export class FakeDiagnosticBuilder {
 
     build(): FakeDiagnostic {
         return new FakeDiagnostic(
-            this.range ?? new vscode.Range(0, 0, 0, 0),
+            this.range ?? new Range(0, 0, 0, 0),
             this.message,
             this.severity,
-            Math.floor(Math.random() * this.timerRange) + this.minimumTime,
+            this.timer,
             this.hidden,
             this.execute,
             this.update
@@ -68,15 +67,15 @@ export class FakeDiagnosticBuilder {
 }
 
 export class FakeDiagnostic {
-    range: vscode.Range;
+    range: Range;
     message: string;
-    severity: vscode.DiagnosticSeverity;
+    severity: DiagnosticSeverity;
     timer: number;
     hidden: boolean;
     constructor(
-        range: vscode.Range,
+        range: Range,
         message: string,
-        severity: vscode.DiagnosticSeverity,
+        severity: DiagnosticSeverity,
         timer: number,
         hidden: boolean,
         execute: any,
@@ -90,8 +89,8 @@ export class FakeDiagnostic {
         this.execute = execute;
         this.update = update;
     }
-    transform(): vscode.Diagnostic {
-        return new vscode.Diagnostic(this.range, this.message, this.severity);
+    transform(): Diagnostic {
+        return new Diagnostic(this.range, this.message, this.severity);
     }
     execute(instance: FakeDiagnostic, document: TextDocument): void {}
     update(instance: FakeDiagnostic): void {}

@@ -18,8 +18,7 @@ export class LoggingDiagnostic extends FakeDiagnostic {
                 .setRange(
                     new Range(position, position.translate(0, log[0].length))
                 )
-                .setMessage('Spy plane ready to be deployed')
-                .setSeverity(DiagnosticSeverity.Information);
+                .setMessage('Spy plane ready to be deployed');
             return builder.build();
         }
         return undefined;

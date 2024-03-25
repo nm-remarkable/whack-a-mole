@@ -17,8 +17,7 @@ export class ConstDiagnostic extends FakeDiagnostic {
                     )
                 )
                 .setMessage('Predator missile inbound')
-                .setSeverity(DiagnosticSeverity.Warning)
-                .setTimer(1500, 500);
+                .setSeverity(DiagnosticSeverity.Warning);
             return builder.build();
         }
     }

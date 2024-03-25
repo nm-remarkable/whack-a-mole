@@ -1,8 +1,9 @@
 import { Range, TextDocument, DiagnosticSeverity, window } from 'vscode';
-import { updateInterval } from '../globals';
 import {
     FakeDiagnostic,
     FakeDiagnosticBuilder,
+    updateInterval,
+    baseDiagnosticTime,
 } from './interface';
 
 export class NukeDiagnostic extends FakeDiagnostic {
@@ -19,7 +20,7 @@ export class NukeDiagnostic extends FakeDiagnostic {
                 'WARNING! WARNING! NUCLEAR WARHEAD INCOMING! WARNING! WARNING!'
             )
             .setSeverity(DiagnosticSeverity.Error)
-            .setTimer(7000, 5000)
+            .setTimer(baseDiagnosticTime * 5)
             .setExecute(execute)
             .setUpdate((instance: FakeDiagnostic) => {
                 instance.timer -= updateInterval;
