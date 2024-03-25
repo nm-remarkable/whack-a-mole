@@ -1,21 +1,8 @@
 import * as vscode from 'vscode';
-import {
-    updateInterval,
-    NukeDiagnostic,
-    ConstDiagnostic,
-    SwearDiagnostic,
-    LoggingDiagnostic,
-    FakeDiagnostic,
-} from './fakeDiagnostics';
+import { FakeDiagnostic } from './diagnostics/interface';
+import { updateInterval, diagnosticTypes, maxFakeDiagnostics } from './globals';
 
-const fakeDiagnostic: Map<string, FakeDiagnostic> = new Map();
-const diagnosticTypes = [
-    NukeDiagnostic,
-    ConstDiagnostic,
-    SwearDiagnostic,
-    LoggingDiagnostic,
-];
-const maxFakeDiagnostics = 2;
+const diagnosticMap: Map<string, FakeDiagnostic> = new Map();
 // Create a collection to report diagnostics to VS Code
 const diagnosticCollection =
     vscode.languages.createDiagnosticCollection('whack-a-mole');
@@ -33,11 +20,11 @@ function updateLoop() {
     if (!document) {
         return;
     }
-    if (fakeDiagnostic.size < maxFakeDiagnostics) {
+    if (diagnosticMap.size < maxFakeDiagnostics) {
         createFakeDiagnostic(document);
     }
     const vscodeDiagnostics: vscode.Diagnostic[] = [];
-    fakeDiagnostic.forEach((diagnostic, key, map) => {
+    diagnosticMap.forEach((diagnostic, key, map) => {
         diagnostic.update(diagnostic); // usually just a timer countdown
         if (diagnostic.timer <= 0) {
             diagnostic.execute(document);
@@ -56,15 +43,15 @@ function updateLoop() {
 function createFakeDiagnostic(document: vscode.TextDocument) {
     const diagnosticType =
         diagnosticTypes[Math.floor(Math.random() * diagnosticTypes.length)];
-    if (fakeDiagnostic.has(diagnosticType.name)) {
+    if (diagnosticMap.has(diagnosticType.name)) {
         return;
     }
     const fake = diagnosticType.create(document);
     if (fake) {
-        fakeDiagnostic.set(diagnosticType.name, fake);
+        diagnosticMap.set(diagnosticType.name, fake);
     }
 }
 
 export function deactivate() {
-    fakeDiagnostic.clear(); // have to clear manually since its not a builtin vscode diagnostic
+    diagnosticMap.clear(); // have to clear manually since its not a builtin vscode diagnostic
 }
