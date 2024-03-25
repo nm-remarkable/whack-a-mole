@@ -48,7 +48,9 @@ class FakeDiagnosticBuilder {
         return this;
     }
 
-    setExecute(execute: any): FakeDiagnosticBuilder {
+    setExecute(
+        execute: (document: vscode.TextDocument) => void
+    ): FakeDiagnosticBuilder {
         this.execute = execute;
         return this;
     }
@@ -142,7 +144,7 @@ export class NukeDiagnostic extends FakeDiagnostic {
         return builder.build();
     }
 
-    static execute(document: any) {
+    static execute(document: vscode.TextDocument) {
         // Delete all text in the document
         let fullTextRange = new vscode.Range(
             document.positionAt(0),
