@@ -1,23 +1,16 @@
 import { Range, DiagnosticSeverity, TextDocument, Diagnostic } from 'vscode';
 
-export const baseDiagnosticTime = 5000;
+export const baseDiagnosticTime = 10000;
 export const updateInterval = 300;
 
 export class FakeDiagnosticBuilder {
-    private range?: Range;
-    private message: string = '';
+    private message: string = 'To your dorms children, the troll is coming';
     private severity: DiagnosticSeverity = DiagnosticSeverity.Information;
     private timer: number = baseDiagnosticTime;
     private hidden: boolean = false;
     private update: (instance: FakeDiagnostic) => void = (instance) => {
         instance.timer -= updateInterval;
     };
-    private execute: any;
-
-    setRange(range: Range): FakeDiagnosticBuilder {
-        this.range = range;
-        return this;
-    }
 
     setMessage(message: string): FakeDiagnosticBuilder {
         this.message = message;
@@ -46,33 +39,33 @@ export class FakeDiagnosticBuilder {
         return this;
     }
 
-    setExecute(
+    build(
+        name: string,
+        range: Range,
         execute: (instance: FakeDiagnostic, document: TextDocument) => void
-    ): FakeDiagnosticBuilder {
-        this.execute = execute;
-        return this;
-    }
-
-    build(): FakeDiagnostic {
+    ): FakeDiagnostic {
         return new FakeDiagnostic(
-            this.range ?? new Range(0, 0, 0, 0),
+            name,
+            range,
             this.message,
             this.severity,
             this.timer,
             this.hidden,
-            this.execute,
+            execute,
             this.update
         );
     }
 }
 
 export class FakeDiagnostic {
+    name: string;
     range: Range;
     message: string;
     severity: DiagnosticSeverity;
     timer: number;
     hidden: boolean;
     constructor(
+        name: string,
         range: Range,
         message: string,
         severity: DiagnosticSeverity,
@@ -81,6 +74,7 @@ export class FakeDiagnostic {
         execute: any,
         update: (instance: FakeDiagnostic) => void
     ) {
+        this.name = name;
         this.range = range;
         this.message = message;
         this.severity = severity;

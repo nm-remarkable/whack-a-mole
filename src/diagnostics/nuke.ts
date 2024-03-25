@@ -14,19 +14,18 @@ export class NukeDiagnostic extends FakeDiagnostic {
             return undefined;
         }
         builder
-            // Show an warning in the ENTIRE document
-            .setRange(new Range(0, 0, document.lineCount, 200))
-            .setMessage(
-                'WARNING! WARNING! NUCLEAR WARHEAD INCOMING! WARNING! WARNING!'
-            )
+            .setMessage('!!WARNING!! NUCLEAR WARHEAD INCOMING !!WARNING!!')
             .setSeverity(DiagnosticSeverity.Error)
             .setTimer(baseDiagnosticTime * 5)
-            .setExecute(execute)
             .setUpdate((instance: FakeDiagnostic) => {
                 instance.timer -= updateInterval;
                 instance.hidden = !instance.hidden;
             });
-        return builder.build();
+        return builder.build(
+            NukeDiagnostic.name,
+            new Range(0, 0, document.lineCount, 200), // Entire document
+            execute
+        );
     }
 }
 

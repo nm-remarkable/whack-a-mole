@@ -14,12 +14,15 @@ export class LoggingDiagnostic extends FakeDiagnostic {
             const position = document.positionAt(index);
             const builder = new FakeDiagnosticBuilder();
 
-            builder
-                .setRange(
-                    new Range(position, position.translate(0, log[0].length))
-                )
-                .setMessage('Spy plane ready to be deployed');
-            return builder.build();
+            return builder
+                .setMessage('Spy plane ready to be deployed')
+                .build(
+                    LoggingDiagnostic.name,
+                    new Range(position, position.translate(0, log[0].length)),
+                    () => {
+                        // TODO
+                    }
+                );
         }
         return undefined;
     }

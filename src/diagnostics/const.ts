@@ -10,15 +10,18 @@ export class ConstDiagnostic extends FakeDiagnostic {
             const position = document.positionAt(index);
             const builder = new FakeDiagnosticBuilder();
             builder
-                .setRange(
-                    new Range(
-                        position,
-                        position.translate(0, cosntAwareness[0].length)
-                    )
-                )
                 .setMessage('Predator missile inbound')
                 .setSeverity(DiagnosticSeverity.Warning);
-            return builder.build();
+            return builder.build(
+                ConstDiagnostic.name,
+                new Range(
+                    position,
+                    position.translate(0, cosntAwareness[0].length)
+                ),
+                () => {
+                    // TODO
+                }
+            );
         }
     }
 }
