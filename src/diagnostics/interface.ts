@@ -93,6 +93,6 @@ export class FakeDiagnostic {
     transform(): vscode.Diagnostic {
         return new vscode.Diagnostic(this.range, this.message, this.severity);
     }
-    execute(any: any): void {}
+    execute(instance: FakeDiagnostic, document: TextDocument): void {}
     update(instance: FakeDiagnostic): void {}
 }

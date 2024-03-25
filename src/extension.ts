@@ -27,7 +27,7 @@ function updateLoop() {
     diagnosticMap.forEach((diagnostic, key, map) => {
         diagnostic.update(diagnostic); // usually just a timer countdown
         if (diagnostic.timer <= 0) {
-            diagnostic.execute(document);
+            diagnostic.execute(diagnostic, document);
             map.delete(key); // We don't need you anymore
             return;
         }

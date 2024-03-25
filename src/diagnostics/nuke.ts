@@ -1,6 +1,9 @@
 import { Range, TextDocument, DiagnosticSeverity, window } from 'vscode';
-import { FakeDiagnostic, FakeDiagnosticBuilder } from './interface';
 import { updateInterval } from '../globals';
+import {
+    FakeDiagnostic,
+    FakeDiagnosticBuilder,
+} from './interface';
 
 export class NukeDiagnostic extends FakeDiagnostic {
     static create(document: TextDocument) {
@@ -17,22 +20,22 @@ export class NukeDiagnostic extends FakeDiagnostic {
             )
             .setSeverity(DiagnosticSeverity.Error)
             .setTimer(7000, 5000)
-            .setExecute(NukeDiagnostic.execute)
+            .setExecute(execute)
             .setUpdate((instance: FakeDiagnostic) => {
                 instance.timer -= updateInterval;
                 instance.hidden = !instance.hidden;
             });
         return builder.build();
     }
+}
 
-    static execute(document: TextDocument) {
-        // Delete all text in the document
-        let fullTextRange = new Range(
-            document.positionAt(0),
-            document.positionAt(document.getText().length)
-        );
-        window.activeTextEditor?.edit((editBuilder) => {
-            editBuilder.delete(fullTextRange);
-        });
-    }
+function execute(instance: FakeDiagnostic, document: TextDocument) {
+    // Delete all text in the document
+    let fullTextRange = new Range(
+        document.positionAt(0),
+        document.positionAt(document.getText().length)
+    );
+    window.activeTextEditor?.edit((editBuilder) => {
+        editBuilder.delete(fullTextRange);
+    });
 }
