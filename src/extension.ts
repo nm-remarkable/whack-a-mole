@@ -10,7 +10,6 @@ const diagnosticCollection =
 export function activate(context: vscode.ExtensionContext) {
     setInterval(updateLoop, updateInterval);
     vscode.workspace.onDidChangeTextDocument((event) => {
-        console.log('onDidChangeTextDocument', event.reason);
         event.contentChanges.forEach((change) => {
             diagnosticMap.forEach((diagnostic) => {
                 // Changes after the line of our diagnostic
@@ -22,7 +21,6 @@ export function activate(context: vscode.ExtensionContext) {
                         lineDelta =
                             change.range.start.line - change.range.end.line;
                     } else if (change.text.includes('\n')) {
-                        // TODO: multiple lines can be added at the same time
                         lineDelta = change.text.split('\n').length - 1;
                     }
                     const isValid = diagnostic.stillApplies(
