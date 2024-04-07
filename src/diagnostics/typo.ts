@@ -14,7 +14,7 @@ export class TypoDiagnostic extends FakeDiagnostic {
     static create(document: TextDocument) {
         const text = document.getText();
         const typos = Array.from(text.matchAll(typoRegex));
-        if (typos) {
+        if (typos.length > 0) {
             const randomAccess = Math.floor(Math.random() * typos.length);
             const typo = typos[randomAccess];
             if (!!typo.index) {
@@ -38,7 +38,7 @@ function execute(instance: FakeDiagnostic, document: TextDocument) {
     const typoRange = instance.range;
     const text = document.getText(typoRange);
     const typos = Array.from(text.matchAll(typoRegex));
-    if (typos) {
+    if (typos.length > 0) {
         const key = typos[0][0];
         window.activeTextEditor?.edit((editor) => {
             editor.replace(
@@ -60,7 +60,7 @@ function stillApplies(
     );
     const text = document.getText(newRange);
     const typos = Array.from(text.matchAll(typoRegex));
-    if (typos) {
+    if (typos.length > 0) {
         instance.range = newRange;
         return true;
     }

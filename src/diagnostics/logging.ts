@@ -37,7 +37,7 @@ export class LoggingDiagnostic extends FakeDiagnostic {
         const logStatements = Array.from(
             text.matchAll(new RegExp(logTypes.join('|'), 'gi'))
         );
-        if (logStatements) {
+        if (logStatements.length > 0) {
             const randomAccess = Math.floor(
                 Math.random() * logStatements.length
             );
@@ -69,7 +69,7 @@ function execute(instance: FakeDiagnostic, document: TextDocument) {
     const logStatements = Array.from(
         text.matchAll(new RegExp(logTypes.join('|'), 'gi'))
     );
-    if (logStatements) {
+    if (logStatements.length > 0) {
         const stmt = logStatements[0][0];
         const index = logTypes.indexOf(stmt);
         if (index > -1) {
@@ -97,7 +97,7 @@ function stillApplies(
     const logStatements = Array.from(
         text.matchAll(new RegExp(logTypes.join('|'), 'gi'))
     );
-    if (logStatements) {
+    if (logStatements.length > 0) {
         instance.range = newRange;
         return true;
     }

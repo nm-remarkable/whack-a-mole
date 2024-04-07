@@ -5,8 +5,8 @@ import { LoggingDiagnostic } from './diagnostics/logging';
 
 export const maxFakeDiagnostics = 1;
 export const diagnosticTypes = [
-    //NukeDiagnostic,
+    NukeDiagnostic,
     //ConstDiagnostic,
-    //TypoDiagnostic,
+    TypoDiagnostic,
     LoggingDiagnostic,
 ];
