@@ -13,25 +13,25 @@ export function activate(context: vscode.ExtensionContext) {
         console.log('onDidChangeTextDocument', event.reason);
         event.contentChanges.forEach((change) => {
             diagnosticMap.forEach((diagnostic) => {
-                console.log(
-                    `change: ${change.range.start.line}, ${diagnostic.range.start.line}`
-                );
                 // Changes after the line of our diagnostic
                 // will not influence the position of our diagnostic
                 if (diagnostic.range.start.line > change.range.start.line - 1) {
+                    let lineDelta = 0;
                     if (change.rangeLength > 1) {
                         // Undo / Redo / Delete multiple characters
-                        diagnostic.stillApplies(
-                            diagnostic,
-                            event.document,
-                            change.range.end.line - change.range.start.line
-                        );
+                        lineDelta =
+                            change.range.start.line - change.range.end.line;
                     } else if (change.text.includes('\n')) {
-                        // TODO: multiple lines can be added at the same time [BUG]
-                        // New line
-                        diagnostic.stillApplies(diagnostic, event.document, 1);
-                    } else {
-                        diagnostic.stillApplies(diagnostic, event.document, 0);
+                        // TODO: multiple lines can be added at the same time
+                        lineDelta = change.text.split('\n').length - 1;
+                    }
+                    const isValid = diagnostic.stillApplies(
+                        diagnostic,
+                        event.document,
+                        lineDelta
+                    );
+                    if (!isValid) {
+                        // TODO: diagnosticMap.delete(diagnostic.name);
                     }
                 }
             });
