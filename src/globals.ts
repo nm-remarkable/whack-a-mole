@@ -7,6 +7,6 @@ export const maxFakeDiagnostics = 1;
 export const diagnosticTypes = [
     //NukeDiagnostic,
     //ConstDiagnostic,
-    TypoDiagnostic,
-    //LoggingDiagnostic,
+    //TypoDiagnostic,
+    LoggingDiagnostic,
 ];
