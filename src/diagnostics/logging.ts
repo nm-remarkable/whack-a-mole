@@ -27,7 +27,7 @@ function getLogType(document: TextDocument): string[] {
     if (!logTypes) {
         return [];
     }
-    return logTypes;
+    return [...logTypes]; // create a copy of the array
 }
 
 export class LoggingDiagnostic extends FakeDiagnostic {
