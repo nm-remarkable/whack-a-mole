@@ -4,12 +4,8 @@ import { FakeDiagnostic, FakeDiagnosticBuilder } from './interface';
 const typoMap = {
     cum: '💦',
     max: 'marx',
-    marx: '☭',
-    pc: 'peace',
-    peace: '☮',
     regex: 'regulatoryexplanatory',
-    ulius: '🏛️',
-    //ass: '( ㅅ )',
+    ass: 'rear',
     anal: 'εつ▄█▀█●',
 };
 const typoRegex = new RegExp(Object.keys(typoMap).join('|'), 'gi');
