@@ -10,18 +10,29 @@ const diagnosticCollection =
 export function activate(context: vscode.ExtensionContext) {
     setInterval(updateLoop, updateInterval);
     vscode.workspace.onDidChangeTextDocument((event) => {
-        const document = event.document;
         console.log('onDidChangeTextDocument', event.reason);
         event.contentChanges.forEach((change) => {
             diagnosticMap.forEach((diagnostic) => {
                 console.log(
                     `change: ${change.range.start.line}, ${diagnostic.range.start.line}`
                 );
+                // Changes after the line of our diagnostic
+                // will not influence the position of our diagnostic
                 if (diagnostic.range.start.line > change.range.start.line - 1) {
-                    if (change.text.includes('\n')) {
-                        diagnostic.stillApplies(diagnostic, document, 1);
+                    if (change.rangeLength > 1) {
+                        // Undo / Redo / Delete multiple characters
+                        diagnostic.stillApplies(
+                            diagnostic,
+                            event.document,
+                            change.range.end.line - change.range.start.line
+                        );
+                    } else if (change.text.includes('\n')) {
+                        // TODO: multiple lines can be added at the same time [BUG]
+                        // New line
+                        diagnostic.stillApplies(diagnostic, event.document, 1);
+                    } else {
+                        diagnostic.stillApplies(diagnostic, event.document, 0);
                     }
-                    return;
                 }
             });
         });
