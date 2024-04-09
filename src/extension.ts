@@ -6,14 +6,17 @@ const diagnosticMap: Map<string, FakeDiagnostic> = new Map();
 // Create a collection to report diagnostics to VS Code
 const diagnosticCollection =
     vscode.languages.createDiagnosticCollection('whack-a-mole');
+var loopInterval: NodeJS.Timeout;
 
 export function activate(context: vscode.ExtensionContext) {
-    setInterval(updateLoop, updateInterval);
-    vscode.workspace.onDidChangeTextDocument((event) =>
-        onTextDocumentChanged(event)
-    );
+    loopInterval = setInterval(updateLoop, updateInterval);
     // Add to a list of disposables which are disposed when this extension is deactivated.
     context.subscriptions.push(diagnosticCollection);
+    context.subscriptions.push(
+        vscode.workspace.onDidChangeTextDocument((event) =>
+            onTextDocumentChanged(event)
+        )
+    );
 }
 
 function updateLoop() {
@@ -83,5 +86,7 @@ function onTextDocumentChanged(event: vscode.TextDocumentChangeEvent) {
 }
 
 export function deactivate() {
-    diagnosticMap.clear(); // have to clear manually since its not a builtin vscode diagnostic
+    // have to clear manually since its not a builtin vscode diagnostic
+    diagnosticMap.clear();
+    clearInterval(loopInterval);
 }
