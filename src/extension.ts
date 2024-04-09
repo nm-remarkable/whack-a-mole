@@ -2,7 +2,9 @@ import * as vscode from 'vscode';
 import { FakeDiagnostic, updateInterval } from './diagnostics/interface';
 import { weightedDiagnosticType, maxFakeDiagnostics } from './globals';
 
-const diagnosticMap: Map<string, FakeDiagnostic> = new Map();
+type DiagnosticMap = Map<string, FakeDiagnostic>;
+var diagnosticMap: DiagnosticMap = new Map();
+const documentDiagnostics: Map<string, DiagnosticMap> = new Map();
 // Create a collection to report diagnostics to VS Code
 const diagnosticCollection =
     vscode.languages.createDiagnosticCollection('whack-a-mole');
@@ -17,6 +19,16 @@ export function activate(context: vscode.ExtensionContext) {
             onTextDocumentChanged(event)
         )
     );
+    context.subscriptions.push(
+        vscode.workspace.onDidOpenTextDocument((doc) => {
+            diagnosticMap = documentDiagnostics.get(doc.fileName) ?? new Map();
+        })
+    );
+    context.subscriptions.push(
+        vscode.workspace.onDidCloseTextDocument((doc) => {
+            documentDiagnostics.set(doc.fileName, diagnosticMap);
+        })
+    );
 }
 
 function updateLoop() {
@@ -28,6 +40,9 @@ function updateLoop() {
         createFakeDiagnostic(document);
     }
     diagnosticMap.forEach((diagnostic, key, map) => {
+        if (diagnostic.documentUri !== document.uri) {
+            return;
+        }
         diagnostic.update(diagnostic); // usually just a timer countdown
         if (diagnostic.timer <= 0) {
             map.delete(key); // We don't need you anymore
@@ -46,7 +61,7 @@ function notifyDiagnosticChanges(
     diagnosticMap.forEach((diagnostic) => {
         // Allows for hidden diagnostics or blinking diagnostics
         // In the case of the Nuke diagnostic we hide it on each update so we get a blinking effect
-        if (!diagnostic.hidden) {
+        if (diagnostic.documentUri === document.uri && !diagnostic.hidden) {
             vscodeDiagnostics.push(diagnostic.transform());
         }
     });
@@ -88,5 +103,6 @@ function onTextDocumentChanged(event: vscode.TextDocumentChangeEvent) {
 export function deactivate() {
     // have to clear manually since its not a builtin vscode diagnostic
     diagnosticMap.clear();
+    documentDiagnostics.clear();
     clearInterval(loopInterval);
 }

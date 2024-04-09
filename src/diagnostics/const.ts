@@ -14,6 +14,7 @@ export class ConstDiagnostic extends FakeDiagnostic {
                 .setSeverity(DiagnosticSeverity.Warning);
             return builder.build(
                 ConstDiagnostic.name,
+                document.uri,
                 new Range(
                     position,
                     position.translate(0, cosntAwareness[0].length)

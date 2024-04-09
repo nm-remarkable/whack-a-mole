@@ -62,6 +62,7 @@ export class LoggingDiagnostic extends FakeDiagnostic {
                     .setStillApplies(stillApplies)
                     .build(
                         LoggingDiagnostic.name,
+                        document.uri,
                         new Range(
                             position,
                             position.translate(0, log[0].length)

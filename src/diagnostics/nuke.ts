@@ -23,6 +23,7 @@ export class NukeDiagnostic extends FakeDiagnostic {
             });
         return builder.build(
             NukeDiagnostic.name,
+            document.uri,
             new Range(0, 0, document.lineCount, 200), // Entire document
             execute
         );

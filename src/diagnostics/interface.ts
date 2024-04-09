@@ -4,6 +4,7 @@ import {
     Range,
     TextDocument,
     TextDocumentContentChangeEvent,
+    Uri,
 } from 'vscode';
 
 export const baseDiagnosticTime = 10000;
@@ -65,11 +66,13 @@ export class FakeDiagnosticBuilder {
 
     build(
         name: string,
+        documentUri: Uri,
         range: Range,
         execute: (instance: FakeDiagnostic, document: TextDocument) => void
     ): FakeDiagnostic {
         return new FakeDiagnostic(
             name,
+            documentUri,
             range,
             this.message,
             this.severity,
@@ -84,6 +87,7 @@ export class FakeDiagnosticBuilder {
 
 export class FakeDiagnostic {
     name: string;
+    documentUri: Uri;
     range: Range;
     message: string;
     severity: DiagnosticSeverity;
@@ -91,6 +95,7 @@ export class FakeDiagnostic {
     hidden: boolean;
     constructor(
         name: string,
+        documentUri: Uri,
         range: Range,
         message: string,
         severity: DiagnosticSeverity,
@@ -105,6 +110,7 @@ export class FakeDiagnostic {
         ) => boolean
     ) {
         this.name = name;
+        this.documentUri = documentUri;
         this.range = range;
         this.message = message;
         this.severity = severity;

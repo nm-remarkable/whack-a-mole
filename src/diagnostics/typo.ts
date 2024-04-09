@@ -32,6 +32,7 @@ export class TypoDiagnostic extends FakeDiagnostic {
                     .setStillApplies(stillApplies);
                 return builder.build(
                     TypoDiagnostic.name,
+                    document.uri,
                     new Range(position, position.translate(0, typo[0].length)),
                     execute
                 );
