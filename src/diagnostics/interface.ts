@@ -1,7 +1,7 @@
 import { Range, DiagnosticSeverity, TextDocument, Diagnostic } from 'vscode';
 
 export const baseDiagnosticTime = 10000;
-export const updateInterval = 300;
+export const updateInterval = 350;
 
 export class FakeDiagnosticBuilder {
     private message: string = 'To your dorms children, the troll is coming';

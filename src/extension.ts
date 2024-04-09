@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { FakeDiagnostic, updateInterval } from './diagnostics/interface';
-import { diagnosticTypes, maxFakeDiagnostics } from './globals';
+import { weightedDiagnosticType, maxFakeDiagnostics } from './globals';
 
 const diagnosticMap: Map<string, FakeDiagnostic> = new Map();
 // Create a collection to report diagnostics to VS Code
@@ -51,8 +51,7 @@ function notifyDiagnosticChanges(
 }
 
 function createFakeDiagnostic(document: vscode.TextDocument) {
-    const diagnosticType =
-        diagnosticTypes[Math.floor(Math.random() * diagnosticTypes.length)];
+    const diagnosticType = weightedDiagnosticType();
     if (diagnosticMap.has(diagnosticType.name)) {
         return;
     }
