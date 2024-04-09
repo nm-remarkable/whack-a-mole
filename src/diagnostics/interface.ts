@@ -1,4 +1,10 @@
-import { Range, DiagnosticSeverity, TextDocument, Diagnostic } from 'vscode';
+import {
+    Diagnostic,
+    DiagnosticSeverity,
+    Range,
+    TextDocument,
+    TextDocumentContentChangeEvent,
+} from 'vscode';
 
 export const baseDiagnosticTime = 10000;
 export const updateInterval = 350;
@@ -13,8 +19,8 @@ export class FakeDiagnosticBuilder {
     };
     private stillApplies = (
         instance: FakeDiagnostic,
-        document: TextDocument,
-        offset: number
+        event: TextDocumentContentChangeEvent,
+        document: TextDocument
     ) => {
         return true;
     };
@@ -49,8 +55,8 @@ export class FakeDiagnosticBuilder {
     setStillApplies(
         stillApplies: (
             instance: FakeDiagnostic,
-            document: TextDocument,
-            offset: number
+            event: TextDocumentContentChangeEvent,
+            document: TextDocument
         ) => boolean
     ): FakeDiagnosticBuilder {
         this.stillApplies = stillApplies;
@@ -94,8 +100,8 @@ export class FakeDiagnostic {
         update: (instance: FakeDiagnostic) => void,
         stillApplies: (
             instance: FakeDiagnostic,
-            document: TextDocument,
-            offset: number
+            event: TextDocumentContentChangeEvent,
+            document: TextDocument
         ) => boolean
     ) {
         this.name = name;
@@ -115,8 +121,8 @@ export class FakeDiagnostic {
     update(instance: FakeDiagnostic): void {}
     stillApplies(
         instance: FakeDiagnostic,
-        document: TextDocument,
-        offset: number
+        event: TextDocumentContentChangeEvent,
+        document: TextDocument
     ): boolean {
         return true;
     }

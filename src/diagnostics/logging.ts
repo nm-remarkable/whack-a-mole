@@ -1,5 +1,16 @@
-import { DiagnosticSeverity, Range, TextDocument, window } from 'vscode';
+import {
+    TextDocumentContentChangeEvent,
+    Range,
+    TextDocument,
+    window,
+    Position,
+} from 'vscode';
 import { FakeDiagnostic, FakeDiagnosticBuilder } from './interface';
+import {
+    calculateLineDelta,
+    calculateCharacterDelta,
+    updateMatchRange,
+} from '../content-event';
 
 const logMap: Map<string, string[]> = new Map();
 
@@ -85,21 +96,10 @@ function execute(instance: FakeDiagnostic, document: TextDocument) {
 
 function stillApplies(
     instance: FakeDiagnostic,
-    document: TextDocument,
-    offset: number
+    event: TextDocumentContentChangeEvent,
+    document: TextDocument
 ): boolean {
     const logTypes = getLogType(document);
-    const newRange = new Range(
-        instance.range.start.translate(offset, 0),
-        instance.range.end.translate(offset, 0)
-    );
-    const text = document.getText(newRange);
-    const logStatements = Array.from(
-        text.matchAll(new RegExp(logTypes.join('|'), 'gi'))
-    );
-    if (logStatements.length > 0) {
-        instance.range = newRange;
-        return true;
-    }
-    return false;
+    const regex = new RegExp(logTypes.join('|'), 'gi');
+    return updateMatchRange(instance, event, document, regex);
 }

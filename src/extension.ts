@@ -66,19 +66,12 @@ function onTextDocumentChanged(event: vscode.TextDocumentChangeEvent) {
         diagnosticMap.forEach((diagnostic, key, map) => {
             // Changes after the line of our diagnostic
             // will not influence the position of our diagnostic
-            if (diagnostic.range.start.line > change.range.start.line - 1) {
-                let lineDelta = 0; // Most likely changes to not affect the position of the diagnostic
-                if (change.rangeLength > 1) {
-                    // Undo / Redo / Delete can affect multiple characters and lines
-                    lineDelta = change.range.start.line - change.range.end.line;
-                } else if (change.text.includes('\n')) {
-                    // New lines, content is shifted down
-                    lineDelta = change.text.split('\n').length - 1;
-                }
+            if (diagnostic.range.start.isAfterOrEqual(change.range.start)) {
+                // updates range of match if the match is not fixed
                 const isValid = diagnostic.stillApplies(
                     diagnostic,
-                    event.document,
-                    lineDelta
+                    change,
+                    event.document
                 );
                 if (!isValid) {
                     map.delete(key);

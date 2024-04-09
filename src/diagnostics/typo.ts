@@ -1,5 +1,12 @@
-import { Position, Range, TextDocument, window } from 'vscode';
+import {
+    Position,
+    Range,
+    TextDocument,
+    TextDocumentContentChangeEvent,
+    window,
+} from 'vscode';
 import { FakeDiagnostic, FakeDiagnosticBuilder } from './interface';
+import { calculateLineDelta, updateMatchRange } from '../content-event';
 
 const typoMap = {
     cum: '💦',
@@ -51,18 +58,8 @@ function execute(instance: FakeDiagnostic, document: TextDocument) {
 
 function stillApplies(
     instance: FakeDiagnostic,
-    document: TextDocument,
-    offset: number
+    event: TextDocumentContentChangeEvent,
+    document: TextDocument
 ): boolean {
-    const newRange = new Range(
-        instance.range.start.translate(offset, 0),
-        instance.range.end.translate(offset, 0)
-    );
-    const text = document.getText(newRange);
-    const typos = Array.from(text.matchAll(typoRegex));
-    if (typos.length > 0) {
-        instance.range = newRange;
-        return true;
-    }
-    return false;
+    return updateMatchRange(instance, event, document, typoRegex);
 }
