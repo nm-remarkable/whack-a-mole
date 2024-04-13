@@ -1,0 +1,51 @@
+name: Release
+on:
+    workflow_dispatch:
+    release:
+        types: [published]
+
+permissions:
+    contents: write
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.head_ref }}
+
+            - name: Update version in package.json with tag
+              run: |
+                  TAG="${GITHUB_REF/refs\/tags\/v/}"
+                  echo "VERSION_TAG=${TAG}" >> $GITHUB_ENV
+                  cat package.json | jq --arg VER $TAG '.version=$VER' > /tmp/package.json
+                  cp /tmp/package.json ./package.json
+
+            - name: Install Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 21
+
+            - name: Build VSIX
+              run: |
+                  npm ci
+                  npm run compile
+                  npx vsce package -o "./whack-a-mole-v${{ env.VERSION_TAG }}.vsix"
+
+            - name: Upload to release page
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  asset_path: ./whack-a-mole-v${{ env.VERSION_TAG }}.vsix
+                  asset_name: whack-a-mole-v${{ env.VERSION_TAG }}.vsix
+                  asset_content_type: application/zip
+
+            - name: Update version in repository
+              uses: stefanzweifel/git-auto-commit-action@v5
+              with:
+                  commit_message: 'Update version to v${{ env.VERSION_TAG }}'
