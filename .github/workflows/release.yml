@@ -55,7 +55,9 @@ jobs:
                   asset_name: whack-a-mole-v${{ env.VERSION_TAG }}.vsix
                   asset_content_type: application/zip
 
-            - name: Update version in repository
-              uses: stefanzweifel/git-auto-commit-action@v5
-              with:
-                  commit_message: 'Update version to v${{ env.VERSION_TAG }}'
+            - name: Update package.json version in repository
+              run: |
+                  git config --global user.email "actions@github.com"
+                  git config --global user.name "GitHub Actions"
+                  git commit -am "Release and bump to version v${{ env.VERSION_TAG }}"
+                  git push origin master
