@@ -36,14 +36,11 @@ jobs:
                   npm run compile
                   npx vsce package -o "./whack-a-mole-v${{ env.VERSION_TAG }}.vsix"
 
-            - name: Upload to release page
-              uses: actions/upload-release-asset@v1
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Upload artifact
+              uses: actions/upload-artifact@v3
               with:
-                  asset_path: ./whack-a-mole-v${{ env.VERSION_TAG }}.vsix
-                  asset_name: whack-a-mole-v${{ env.VERSION_TAG }}.vsix
-                  asset_content_type: application/zip
+                  path: ./whack-a-mole-v${{ env.VERSION_TAG }}.vsix
+                  name: whack-a-mole-v${{ env.VERSION_TAG }}.vsix
 
             - name: Update version in repository
               uses: stefanzweifel/git-auto-commit-action@v5
