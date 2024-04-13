@@ -3,7 +3,7 @@
   "displayName": "whack-a-mole",
   "description": "",
   "icon": "images/side-hammer.png",
-  "version": "0.0.4",
+  "version": "0.0.1",
   "license": "GLWTS",
   "engines": {
     "vscode": "^1.87.0"
