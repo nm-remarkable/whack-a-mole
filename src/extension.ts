@@ -6,13 +6,11 @@ type DiagnosticMap = Map<string, FakeDiagnostic>;
 var diagnosticMap: DiagnosticMap = new Map();
 const documentDiagnostics: Map<string, DiagnosticMap> = new Map();
 var updateDiagnosticsInterval: NodeJS.Timeout;
-const newDiagnosticInterval = 30000;
 
 // Create a collection to report diagnostics to VS Code
 const collection = vscode.languages.createDiagnosticCollection('whack-a-mole');
 
 export function activate(context: vscode.ExtensionContext) {
-    newDiagnostic();
     updateDiagnosticsInterval = setInterval(updateLoop, updateInterval);
 
     // Add to a list of disposables which are disposed when this extension is deactivated.
@@ -56,6 +54,8 @@ function updateLoop() {
 }
 
 function newDiagnostic() {
+    const config = vscode.workspace.getConfiguration('whack-a-mole');
+    const timer: number = Number(config.get('newWarningTimer')) * 1000;
     setTimeout(() => {
         const document = vscode.window.activeTextEditor?.document;
         if (!document) {
@@ -75,7 +75,7 @@ function newDiagnostic() {
             }
         }
         notifyDiagnosticChanges(document, diagnosticMap);
-    }, newDiagnosticInterval);
+    }, timer);
 }
 
 function notifyDiagnosticChanges(
@@ -89,7 +89,6 @@ function notifyDiagnosticChanges(
         if (diagnostic.documentUri === document.uri && !diagnostic.hidden) {
             vscodeDiagnostics.push(diagnostic.transform());
         }
-        console.log('Diagnostic updated', diagnostic.name, diagnostic.timer);
     });
     collection.set(document.uri, vscodeDiagnostics);
 }

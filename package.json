@@ -12,7 +12,18 @@
         "onLanguage"
     ],
     "main": "./dist/extension.js",
-    "contributes": {},
+    "contributes": {
+        "configuration": {
+            "title": "Whack-a-mole",
+            "properties": {
+                "whack-a-mole.newWarningTimer": {
+                    "type": "number",
+                    "default": 30,
+                    "description": "Timer for creating a new warning in seconds"
+                }
+            }
+        }
+    },
     "scripts": {
         "vscode:prepublish": "npm run package",
         "compile": "webpack",
