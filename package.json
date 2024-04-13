@@ -2,10 +2,16 @@
     "name": "whack-a-mole",
     "displayName": "whack-a-mole",
     "description": "",
+    "icon": "./images/side-hammer.png",
     "version": "0.0.1",
     "license": "GLWTS",
     "engines": {
         "vscode": "^1.87.0"
+    },
+    "publisher": "nm-remarkable",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/nm-remarkable/whack-a-mole.git"
     },
     "categories": [],
     "activationEvents": [
@@ -13,6 +19,24 @@
     ],
     "main": "./dist/extension.js",
     "contributes": {
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "whack-a-mole",
+                    "title": "Whack a mole",
+                    "icon": "./images/side-hammer.png"
+                }
+            ]
+        },
+        "views": {
+            "whack-a-mole": [
+                {
+                    "id": "whack-a-mole.activityBar",
+                    "type": "webview",
+                    "name": ""
+                }
+            ]
+        },
         "configuration": {
             "title": "Whack-a-mole",
             "properties": {

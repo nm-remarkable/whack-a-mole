@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { ActivityBarView } from './activarbar-view';
 import { FakeDiagnostic, updateInterval } from './diagnostics/interface';
 import { weightedDiagnosticType, maxFakeDiagnostics } from './globals';
 
@@ -6,12 +7,18 @@ type DiagnosticMap = Map<string, FakeDiagnostic>;
 var diagnosticMap: DiagnosticMap = new Map();
 const documentDiagnostics: Map<string, DiagnosticMap> = new Map();
 var updateDiagnosticsInterval: NodeJS.Timeout;
+var sessionScore = 0;
+var activityBarView: ActivityBarView;
 
 // Create a collection to report diagnostics to VS Code
 const collection = vscode.languages.createDiagnosticCollection('whack-a-mole');
 
 export function activate(context: vscode.ExtensionContext) {
     updateDiagnosticsInterval = setInterval(updateLoop, updateInterval);
+
+    activityBarView = new ActivityBarView(() => {
+        return sessionScore;
+    });
 
     // Add to a list of disposables which are disposed when this extension is deactivated.
     context.subscriptions.push(collection);
@@ -98,7 +105,7 @@ function onTextDocumentChanged(event: vscode.TextDocumentChangeEvent) {
         diagnosticMap.forEach((diagnostic, key, map) => {
             // Changes after the line of our diagnostic
             // will not influence the position of our diagnostic
-            if (diagnostic.range.start.isAfterOrEqual(change.range.start)) {
+            if (change.range.start.isBefore(diagnostic.range.end)) {
                 // updates range of match if the match is not fixed
                 const isValid = diagnostic.stillApplies(
                     diagnostic,
@@ -106,6 +113,8 @@ function onTextDocumentChanged(event: vscode.TextDocumentChangeEvent) {
                     event.document
                 );
                 if (!isValid) {
+                    sessionScore += 1;
+                    activityBarView.update();
                     map.delete(key);
                     newDiagnostic();
                 }
