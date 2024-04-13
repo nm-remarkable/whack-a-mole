@@ -59,5 +59,6 @@ jobs:
               run: |
                   git config --global user.email "actions@github.com"
                   git config --global user.name "GitHub Actions"
-                  git commit -am "Release and bump to version v${{ env.VERSION_TAG }}"
+                  git commit -a ./package.json
+                  git commit -m "Release and bump to version v${{ env.VERSION_TAG }}"
                   git push origin HEAD:master
