@@ -1,8 +1,8 @@
 name: Release
 on:
-    workflow_dispatch:
-    release:
-        types: [published]
+    push:
+        tags:
+            - 'v*'
 
 permissions:
     contents: write
@@ -15,8 +15,6 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
-              with:
-                  ref: ${{ github.head_ref }}
 
             - name: Update version in package.json with tag
               run: |
@@ -36,11 +34,26 @@ jobs:
                   npm run compile
                   npx vsce package -o "./whack-a-mole-v${{ env.VERSION_TAG }}.vsix"
 
-            - name: Upload artifact
-              uses: actions/upload-artifact@v3
+            - name: Create Release
+              id: create_release
+              uses: actions/create-release@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
-                  path: ./whack-a-mole-v${{ env.VERSION_TAG }}.vsix
-                  name: whack-a-mole-v${{ env.VERSION_TAG }}.vsix
+                  tag_name: ${{ github.ref }}
+                  release_name: Release ${{ github.ref }}
+                  draft: false
+                  prerelease: false
+
+            - name: Upload to Release
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: ./whack-a-mole-v${{ env.VERSION_TAG }}.vsix
+                  asset_name: whack-a-mole-v${{ env.VERSION_TAG }}.vsix
+                  asset_content_type: application/zip
 
             - name: Update version in repository
               uses: stefanzweifel/git-auto-commit-action@v5
