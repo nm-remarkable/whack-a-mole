@@ -2,7 +2,7 @@
     "name": "whack-a-mole",
     "displayName": "whack-a-mole",
     "description": "",
-    "icon": "./images/side-hammer.png",
+    "icon": "images/side-hammer.png",
     "version": "0.0.1",
     "license": "GLWTS",
     "engines": {
