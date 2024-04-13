@@ -5,15 +5,18 @@ import { weightedDiagnosticType, maxFakeDiagnostics } from './globals';
 type DiagnosticMap = Map<string, FakeDiagnostic>;
 var diagnosticMap: DiagnosticMap = new Map();
 const documentDiagnostics: Map<string, DiagnosticMap> = new Map();
+var updateDiagnosticsInterval: NodeJS.Timeout;
+const newDiagnosticInterval = 30000;
+
 // Create a collection to report diagnostics to VS Code
-const diagnosticCollection =
-    vscode.languages.createDiagnosticCollection('whack-a-mole');
-var loopInterval: NodeJS.Timeout;
+const collection = vscode.languages.createDiagnosticCollection('whack-a-mole');
 
 export function activate(context: vscode.ExtensionContext) {
-    loopInterval = setInterval(updateLoop, updateInterval);
+    newDiagnostic();
+    updateDiagnosticsInterval = setInterval(updateLoop, updateInterval);
+
     // Add to a list of disposables which are disposed when this extension is deactivated.
-    context.subscriptions.push(diagnosticCollection);
+    context.subscriptions.push(collection);
     context.subscriptions.push(
         vscode.workspace.onDidChangeTextDocument((event) =>
             onTextDocumentChanged(event)
@@ -22,6 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.workspace.onDidOpenTextDocument((doc) => {
             diagnosticMap = documentDiagnostics.get(doc.fileName) ?? new Map();
+            newDiagnostic();
         })
     );
     context.subscriptions.push(
@@ -36,9 +40,6 @@ function updateLoop() {
     if (!document) {
         return;
     }
-    if (diagnosticMap.size < maxFakeDiagnostics) {
-        createFakeDiagnostic(document);
-    }
     diagnosticMap.forEach((diagnostic, key, map) => {
         if (diagnostic.documentUri !== document.uri) {
             return;
@@ -47,10 +48,34 @@ function updateLoop() {
         if (diagnostic.timer <= 0) {
             map.delete(key); // We don't need you anymore
             diagnostic.execute(diagnostic, document);
+            newDiagnostic();
             return;
         }
     });
     notifyDiagnosticChanges(document, diagnosticMap);
+}
+
+function newDiagnostic() {
+    setTimeout(() => {
+        const document = vscode.window.activeTextEditor?.document;
+        if (!document) {
+            return;
+        }
+        if (diagnosticMap.size < maxFakeDiagnostics) {
+            var fake = undefined;
+            while (!fake) {
+                const diagnosticType = weightedDiagnosticType();
+                if (diagnosticMap.has(diagnosticType.name)) {
+                    return;
+                }
+                fake = diagnosticType.create(document);
+                if (fake) {
+                    diagnosticMap.set(diagnosticType.name, fake);
+                }
+            }
+        }
+        notifyDiagnosticChanges(document, diagnosticMap);
+    }, newDiagnosticInterval);
 }
 
 function notifyDiagnosticChanges(
@@ -64,19 +89,9 @@ function notifyDiagnosticChanges(
         if (diagnostic.documentUri === document.uri && !diagnostic.hidden) {
             vscodeDiagnostics.push(diagnostic.transform());
         }
+        console.log('Diagnostic updated', diagnostic.name, diagnostic.timer);
     });
-    diagnosticCollection.set(document.uri, vscodeDiagnostics);
-}
-
-function createFakeDiagnostic(document: vscode.TextDocument) {
-    const diagnosticType = weightedDiagnosticType();
-    if (diagnosticMap.has(diagnosticType.name)) {
-        return;
-    }
-    const fake = diagnosticType.create(document);
-    if (fake) {
-        diagnosticMap.set(diagnosticType.name, fake);
-    }
+    collection.set(document.uri, vscodeDiagnostics);
 }
 
 function onTextDocumentChanged(event: vscode.TextDocumentChangeEvent) {
@@ -93,6 +108,7 @@ function onTextDocumentChanged(event: vscode.TextDocumentChangeEvent) {
                 );
                 if (!isValid) {
                     map.delete(key);
+                    newDiagnostic();
                 }
             }
         });
@@ -104,5 +120,5 @@ export function deactivate() {
     // have to clear manually since its not a builtin vscode diagnostic
     diagnosticMap.clear();
     documentDiagnostics.clear();
-    clearInterval(loopInterval);
+    clearInterval(updateDiagnosticsInterval);
 }
