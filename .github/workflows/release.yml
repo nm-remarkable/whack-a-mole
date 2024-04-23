@@ -38,10 +38,13 @@ jobs:
               run: |
                   npm ci
                   npm run compile
-                  npx vsce package -o "./whack-a-mole-v${{ env.VERSION_TAG }}.vsix"
+                  npx vsce package -o ./whack-a-mole-v${{ env.VERSION_TAG }}.vsix
 
             - name: Release
               uses: softprops/action-gh-release@v2
               if: startsWith(github.ref, 'refs/tags/')
               with:
                   files: whack-a-mole-v${{ env.VERSION_TAG }}.vsix
+
+            - name: Publish to VSCode Marketplace
+              run: npx vsce publish --pat ${{ secrets.VSCODE_MARKETPLACE_PAT }} --packagePath ./whack-a-mole-v${{ env.VERSION_TAG }}.vsix
